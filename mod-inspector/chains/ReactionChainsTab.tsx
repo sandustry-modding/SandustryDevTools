@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { elementSourceLabel } from "../mod-source";
 import { ElementPixel } from "../elements/ElementPixel";
-import { contrastText, tileFillCss } from "../elements/element-colors";
 import type { ElementRow } from "../elements/list-elements";
 import { FlowList } from "./ChainFlows";
 import { buildChainIndex, elementStepCount, type ChainIndex, type ChainStep } from "./chain-index";
@@ -62,49 +61,6 @@ function PickerRow({
         <span className="text-[10px] text-slate-600 shrink-0">—</span>
       )}
     </button>
-  );
-}
-
-function RootHeader({
-  element,
-  crumb,
-  onBack,
-}: {
-  element: ElementRow | undefined;
-  crumb: number[];
-  onBack: () => void;
-}) {
-  if (!element) {
-    return (
-      <div className="shrink-0 px-3 py-3 border-b border-slate-600">
-        <p className="text-[12px] text-slate-500">Pick an element to explore chains.</p>
-      </div>
-    );
-  }
-  const fill = tileFillCss(element.backgroundCss);
-  const ink = contrastText(fill);
-  return (
-    <div className="shrink-0 px-3 py-2.5 border-b border-slate-600 flex items-center gap-3">
-      {crumb.length > 0 ? (
-        <button
-          type="button"
-          onClick={onBack}
-          className="text-[11px] text-slate-400 hover:text-[#ffe700] shrink-0"
-        >
-          ← Back
-        </button>
-      ) : null}
-      <span
-        className="shrink-0 border border-black/50 flex items-center justify-center gap-1 text-[10px] font-mono font-bold"
-        style={{ width: 48, height: 36, backgroundColor: fill, color: ink }}
-      >
-        <ElementPixel element={element} size={14} />
-        {element.elementType}
-      </span>
-      <p className="text-[14px] font-semibold text-[#ffe700] truncate leading-tight min-w-0 flex-1">
-        {element.name}
-      </p>
-    </div>
   );
 }
 
@@ -258,7 +214,6 @@ export function ReactionChainsTab() {
   const doesCount = rootType == null ? 0 : stepsFor(index, rootType, "down", enabled).length;
   const fromCount = rootType == null ? 0 : stepsFor(index, rootType, "up", enabled).length;
 
-  const rootElement = rootType != null ? index.elements.get(rootType) : undefined;
   const selectedStepId = selection?.kind === "step" ? selection.step.id : null;
   const seen = useMemo(
     () => (rootType == null ? new Set<number>() : new Set([rootType])),
@@ -399,7 +354,17 @@ export function ReactionChainsTab() {
         </aside>
 
         <div className="min-w-0 min-h-0 flex flex-col overflow-hidden bg-black/60">
-          <RootHeader element={rootElement} crumb={crumb} onBack={goBack} />
+          {crumb.length > 0 ? (
+            <div className="shrink-0 px-3 py-2 border-b border-slate-600">
+              <button
+                type="button"
+                onClick={goBack}
+                className="text-[11px] text-slate-400 hover:text-[#ffe700]"
+              >
+                ← Back
+              </button>
+            </div>
+          ) : null}
           {rootType != null ? (
             <div
               className="flex-1 min-h-0 grid"
@@ -407,7 +372,7 @@ export function ReactionChainsTab() {
             >
               <section className="min-h-0 flex flex-col overflow-hidden border-b border-slate-600">
                 <div className="px-3 py-1.5 border-b border-slate-700/60 shrink-0 flex items-center justify-between">
-                  <p className="text-[10px] uppercase tracking-wider text-slate-400">Does</p>
+                  <p className="text-[10px] uppercase tracking-wider text-slate-400">Recipes</p>
                   <span className="text-[10px] text-slate-500">{doesCount}</span>
                 </div>
                 <div className="flex-1 min-h-0 overflow-y-auto">
