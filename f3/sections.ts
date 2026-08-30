@@ -16,7 +16,7 @@ function worldToCell(x: number, y: number): { x: number; y: number } {
   return { x: Math.floor(x / size), y: Math.floor(y / size) };
 }
 
-/** Built-in F3 sections for the debug companion. Import once at boot. */
+/** Built-in F3 sections. Import once at boot. */
 export function registerBuiltinF3Sections(): () => void {
   const stops = [
     registerF3Section({

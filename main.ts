@@ -3,7 +3,7 @@ import { registerDevToolsShortcut, scheduleMainMenuBoot } from "./boot/boot-menu
 import { syncCrispCanvas } from "./boot/crisp-canvas";
 import { syncFastBootPrefs } from "./boot/fast-boot";
 import { settingOn } from "./boot/settings";
-import { installDebugCompanion } from "./f3/install";
+import { installF3Debug } from "./f3/install";
 import { installModInspector } from "./mod-inspector/install";
 import modinfo from "./modinfo.json";
 import { installFirstLoadApiWrap } from "./reload/first-load-wrap.ts";
@@ -48,7 +48,7 @@ function main() {
   if (settingOn(api, "f12DevTools")) registerDevToolsShortcut();
   scheduleMainMenuBoot(api);
   if (settingOn(api, "disableAutosave")) disableSessionAutosave();
-  installDebugCompanion(api, modinfo.id);
+  installF3Debug(api, modinfo.id);
   installModInspector(api, modinfo.id);
   syncLocalModReload();
   api.settings.onChange(() => {

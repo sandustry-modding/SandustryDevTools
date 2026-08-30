@@ -1,13 +1,13 @@
 {
   "$schema": "https://sandustry-modding.github.io/SandustryTypes/schemas/modinfo.json",
   "manifestVersion": 1,
-  "id": "dev-tools",
+  "id": "irishbruse.dev-tools",
   "name": "Dev Tools",
   "version": "0.0.2",
   "apiVersion": 1,
   "entry": "main.js",
   "author": "IrishBruse",
-  "description": "Dev companion: watch local mods, DevTools, auto-load save, disable autosave, F3 overlay. Debug builds install it; release stages build/dev-tools/.",
+  "description": "Watch local mods, DevTools, auto-load save, disable autosave, F3 overlay.",
   "dependencies": [],
   "loadOrder": -2147483648,
   "configSchema": {

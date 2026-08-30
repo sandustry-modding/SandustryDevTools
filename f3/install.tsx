@@ -3,14 +3,14 @@ import { registerBuiltinF3Sections } from "./sections";
 import { syncEngineDebug } from "./enable-debug";
 import { F3DebugOverlay } from "./F3DebugOverlay";
 
-/** Keep engine `debug.active` on while the debug companion is enabled. */
+/** Keep engine `debug.active` on while this mod is enabled. */
 function installEngineDebug(api: SandkitApi): void {
   syncEngineDebug(api);
   api.settings.onChange(() => syncEngineDebug(api));
 }
 
 /** F3 overlay, built-in sections, and DevTools console hook for extensions. */
-export function installDebugCompanion(api: SandkitApi, modId: string): void {
+export function installF3Debug(api: SandkitApi, modId: string): void {
   installEngineDebug(api);
 
   registerBuiltinF3Sections();

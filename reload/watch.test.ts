@@ -3,7 +3,7 @@ import test from "node:test";
 import type { WatchedFile } from "./discover.ts";
 import { applySettledWatch, classifyWatchAction } from "./watch.ts";
 
-test("classifyWatchAction skips companion main and hot-evals sibling main", () => {
+test("classifyWatchAction skips this mod's main and hot-evals sibling main", () => {
   assert.equal(classifyWatchAction("main", true), "skip");
   assert.equal(classifyWatchAction("main", false), "hot-eval");
   assert.equal(classifyWatchAction("worker", true), "hard-reload");

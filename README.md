@@ -1,22 +1,16 @@
 # Dev Tools
 
-Dev companion mod. The game folder name is **`dev-tools`** (`mods/dev-tools`, from `modinfo.id`). Debug builds (`npm run dev`, `--debug`) install it. `npm run build` stages a release bundle under `build/dev-tools/`. `npm run publish` does not list it.
+Local Sandustry mod. The game folder name is **`dev-tools`** (`mods/dev-tools`, from `modinfo.id`).
 
 Manifest **`loadOrder`** is `-2147483648`. Session entry order may still run other mods first, so API-call logging is installed in an early boot patch before any mod `main.js`.
 
-When **Watch local mods** is on, this companion polls other mods' `main.js` and re-evals the renderer bundle after a save. It also polls `worker.js` and `patches.json` (including this companion). Those files cannot hot-eval: a danger toast tells you to **stop and start** the game (F5). Save reload (`?db_load=`) is not enough on Steam. Turn the setting on in **Options → Mods → dev-tools**.
+When **Watch local mods** is on, this mod polls other mods' `main.js` and re-evals the renderer bundle after a save. It also polls `patches.json`, and `worker.js` only when that mod has a worker. Those files cannot hot-eval: a danger toast tells you to **stop and start** the game (F5). Save reload (`?db_load=`) is not enough on Steam. Turn the setting on in **Options → Mods → Dev Tools**.
 
-Settings live on this mod. Open **Options → Mods → dev-tools**.
+Settings live on this mod. Open **Options → Mods → Dev Tools**.
 
-## When it is installed
+## Builds
 
-| Build         | Command                                       | This mod                     | `debugPatches` |
-| ------------- | --------------------------------------------- | ---------------------------- | -------------- |
-| Release       | `npm run build`                               | Staged (`build/dev-tools/`)  | Omitted        |
-| Dev           | `npm run dev`, `--watch`, `--game`, `--debug` | Installed (`mods/dev-tools`) | Included       |
-| Release watch | `npm run dev:release` / `--no-debug`          | Not installed                | Omitted        |
-
-`--mod template` on a debug build still installs **dev-tools**. `--mod irishbruse.dev-tools` builds only this folder.
+This folder builds like any other `src/` mod. Debug commands (`npm run dev`, `--watch`, `--game`, `--debug`) include `debugPatches`. Release commands (`npm run build`, `npm run dev:release`) omit them. `--mod irishbruse.dev-tools` builds only this folder.
 
 ## Settings
 
@@ -27,9 +21,9 @@ Settings live on this mod. Open **Options → Mods → dev-tools**.
 | **F12 opens DevTools**    | `f12DevTools`     | off         | Capture-phase F12. Can disconnect an IDE debugger session                                                                                                               |
 | **Auto-load save**        | `autoLoad`        | off         | On load, `location.assign` with `?db_load=<saveId>`. Skips splash and main menu. Legacy `autoBoot` prefs still count until you set `autoLoad`                           |
 | **Start save**            | `startSave`       | Mod storage | **Last played** or **Mod storage**. **Mod storage** reads `api.storage` (`startSave`). Set the id from DevTools or another mod.                                         |
-| **F3 debug overlay**      | `f3Debug`         | off         | F3 toggles companion debug overlay. Vanilla Debug / Stats stay on while the mod is enabled                                                                              |
+| **F3 debug overlay**      | `f3Debug`         | off         | F3 toggles the debug overlay. Vanilla Debug / Stats stay on while the mod is enabled                                                                                    |
 | **Disable autosave**      | `disableAutosave` | off         | Sets `session.settings.autosaveInterval` to `0`. Manual saves still work                                                                                                |
-| **Watch local mods**      | `watchLocalMods`  | off         | Poll other mods' `main.js` and re-eval the renderer bundle. Toast when `worker.js` or `patches.json` change (restart the game).                                          |
+| **Watch local mods**      | `watchLocalMods`  | off         | Poll other mods' `main.js` and re-eval the renderer bundle. Toast when `worker.js` or `patches.json` change (restart the game).                                         |
 | **Fast dev boot**         | `fastBoot`        | off         | Skip `foliage.generate` on boot. Raster, shadows, and shader compile stay vanilla. Writes `localStorage`. Needs `debugPatches` (dev). Restart once after you turn it on |
 | **Crisp canvas zoom**     | `crispCanvas`     | off         | Nearest-neighbour scaling on `#canvas` and `#overlay-canvas` so zoom stays sharp instead of blurry                                                                      |
 
@@ -43,7 +37,7 @@ Turn on **Watch local mods**, **Fast dev boot**, **Auto-load save**, **F3 debug 
 - **Auto-load save** (`boot/boot-menu.ts`, `boot/auto-load-save.ts`) — reloads with `?db_load=` for the **Start save** pick.
 - **Disable autosave** (`boot/autosave.ts`) — sets interval to `0` on load.
 - **F3 debug overlay** (`f3/F3DebugOverlay.tsx`) — Minecraft-style text HUD. Extend with `registerF3Section` / `globalThis.debugF3`.
-- **Dev Tools** (`mod-inspector/`) — pause **Dev Tools** opens a 1100×720 panel. **Mods** tab: compact loaded-mod cards; **Open** fills the tab with details (description first, then contributes, then load meta); save issues stay collapsed. **Elements**: family sand table. **Chains**: pick an element. **Does** shows where it goes (`Gold → Smelter → Liquid Gold`). **Comes from** shows how it is made. Depth 1 is one recipe hop. The index includes engine builtins (Wet Sand shaker, Residue burn, Burnt Residue press, Water contacts) because those rows are not in `mods.recipes`.
+- **Dev Tools** (`mod-inspector/`) — pause **Dev Tools** opens a 1100×720 panel. **Mods** tab: compact loaded-mod cards; **Open** fills the tab with details (description first, then contributes, then load meta); save issues stay collapsed. **Elements**: family sand table. **Chains**: pick an element. **Does** and **Comes from** list recipe hops. Depth 1 is one hop. The index includes engine builtins (Wet Sand shaker, Residue burn, Burnt Residue press, Water contacts) because those rows are not in `mods.recipes`.
 - **Watch local mods** (`reload/`) — poll and re-eval other mods' renderer `main.js`. Toast when `worker.js` or `patches.json` change.
 - **Fast dev boot** (`patches.ts`, `boot/fast-boot.ts`) — when on, skips `foliage.generate` only. Raster fill, shadow rebuild, and outline compile stay vanilla. Needs `debugPatches` (dev). Restart once after you turn it on.
 - **Crisp canvas zoom** (`boot/crisp-canvas.ts`) — injects `image-rendering: pixelated` on the world canvases. Toggle in **Options → Mods → dev-tools**.
@@ -65,7 +59,7 @@ This mod copies the live Sandkit objects onto `globalThis` for the browser conso
 
 ## Auto-load save
 
-When **Auto-load save** is on, the companion resolves a save id from **Start save** and navigates like the game **Continue** path:
+When **Auto-load save** is on, this mod resolves a save id from **Start save** and navigates like the game **Continue** path:
 
 ```ts
 const url = new URL(window.location.href);
@@ -103,9 +97,9 @@ After boot, `globalThis.debugF3.registerSection` is the same API for DevTools ex
 
 ## Watch local mods
 
-When **Watch local mods** is on, the companion polls other **local** mods' `main.js` about twice per second. It uses `session.externalMods.orderedMods` with `discoveredVia: local`. It does not poll Workshop ids from the save order list. After `npm run dev` writes a new bundle, it re-evals that renderer entry with **that mod's** `sandkit` (stashed at first load as `globalThis.__sandkitByMod[id]`). It does not wrap the companion `sandkit`.
+When **Watch local mods** is on, this mod polls other **local** mods' `main.js` about twice per second. It uses `session.externalMods.orderedMods` with `discoveredVia: local`. It does not poll Workshop ids from the save order list. After `npm run dev` writes a new bundle, it re-evals that renderer entry with **that mod's** `sandkit` (stashed at first load as `globalThis.__sandkitByMod[id]`). It does not wrap this mod's `sandkit`.
 
-On first load, companion `main.js` installs `__devToolsWrapSandkit` for dispose tracking. `stash-sandkit-by-mod` stashes the raw host, then passes a wrapped copy into `c(sandkit)`. Hot eval wraps again the same way.
+On first load, this mod's `main.js` installs `__devToolsWrapSandkit` for dispose tracking. `stash-sandkit-by-mod` stashes the raw host, then passes a wrapped copy into `c(sandkit)`. Hot eval wraps again the same way.
 
 Each reload runs tracked disposers first:
 
@@ -117,13 +111,13 @@ Each reload runs tracked disposers first:
 
 Hot eval leaves `api.ui.toast` messages unchanged. The console logs `Reloaded <id> vN`.
 
-When `worker.js` or `patches.json` change (any local mod, including this companion), the poller does **not** eval them. It shows a danger toast: restart the game (F5). `globalThis.__devToolsHardReload.reasons` records `{ modId, kind, at }` for tests. Steam applies patches and worker source at **process** start. `?db_load=` / a page reload does not re-read those files. The Chromium integration host may re-fetch HTTP `worker.js`; that is not Steam behavior. Auto save-reload on those files stays **off**.
+When `worker.js` or `patches.json` change (any local mod, including this one), the poller does **not** eval them. It shows a danger toast: restart the game (F5). `globalThis.__devToolsHardReload.reasons` records `{ modId, kind, at }` for tests. Steam applies patches and worker source at **process** start. `?db_load=` / a page reload does not re-read those files. The Chromium integration host may re-fetch HTTP `worker.js`; that is not Steam behavior. Auto save-reload on those files stays **off**.
 
 Content `register` calls (`elements`, `structures`, `i18n`, …) are not wrapped — they have no unregister and the game updates the same id on re-register.
 
 It does not:
 
-- Hot-eval this companion `main.js`
+- Hot-eval this mod's `main.js`
 - Reload `worker.js` into sim workers
 - Re-apply `patches.json`
 

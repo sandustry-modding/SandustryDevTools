@@ -1,20 +1,17 @@
-/** Companion mod id — must match `modinfo.id` in `../modinfo.ts`. */
-export const COMPANION_MOD_ID = "dev-tools";
-
 /** Sentinel: resolve to the game's last played save at boot time. */
 export const AUTO_LOAD_LAST_PLAYED = "__last__";
 
-/** Sentinel: resolve to `api.storage` on this companion. */
+/** Sentinel: resolve to `api.storage` on this mod. */
 export const AUTO_LOAD_FROM_STORAGE = "__storage__";
 
 /**
  * Storage key other mods write with
- * `api.storage.set(COMPANION_MOD_ID, START_SAVE_STORAGE_KEY, saveId)`.
+ * `api.storage.set(DEBUG_MOD_ID, START_SAVE_STORAGE_KEY, saveId)`.
  */
 export const START_SAVE_STORAGE_KEY = "startSave";
 
-/** Same as `COMPANION_MOD_ID` — namespace for `api.storage` on this companion. */
-export const DEBUG_MOD_ID = COMPANION_MOD_ID;
+/** Must match `modinfo.id`. Namespace for `api.storage` on this mod. */
+export const DEBUG_MOD_ID = "dev-tools";
 
 type ElectronBridge = {
   getLastPlayedGameSync?(): string | null;
@@ -67,7 +64,7 @@ export function getLastPlayedSaveId(): string | null {
   }
 }
 
-/** Read `startSave` from companion storage. */
+/** Read `startSave` from this mod's storage. */
 export function getStorageSaveId(api: SandkitApi): string | null {
   api.storage.ensure(DEBUG_MOD_ID);
   const value = api.storage.get(DEBUG_MOD_ID, START_SAVE_STORAGE_KEY);

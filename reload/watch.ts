@@ -8,7 +8,7 @@ export type SettledWatchHandlers = {
   hardReload: (id: string, kind: HardReloadKind) => void;
 };
 
-/** Companion `main.js` is not hot-evaled. Worker and patches need a process restart. */
+/** This mod's `main.js` is not hot-evaled. Worker and patches need a process restart. */
 export function classifyWatchAction(kind: WatchedKind, isSelf: boolean): WatchAction {
   if (kind === "main") return isSelf ? "skip" : "hot-eval";
   return "hard-reload";

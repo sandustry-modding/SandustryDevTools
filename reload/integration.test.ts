@@ -4,7 +4,7 @@ import { SANDUSTRY_TEST_HTTP_PORT, SandustrySession, setupGame } from "@modkit/t
 import { AUTO_SAVE_RELOAD_ON_HARD_RELOAD } from "./hard-reload.ts";
 import { setTimeout as sleep } from "node:timers/promises";
 
-const COMPANION_ID = "dev-tools";
+const DEV_TOOLS_ID = "dev-tools";
 const TEMPLATE_ID = "author.template";
 const WORKER_MOD_ID = "example.worker-api";
 const TOAST_PROBE = "Template loaded";
@@ -21,13 +21,13 @@ type SandkitHost = {
 
 type LiveSnapshot = {
   watch: boolean | null;
-  companionEnabled: boolean | null;
+  enabled: boolean | null;
   scene: number | null;
   gameScene: number | null;
   generation: number;
-  companionGeneration: number;
+  selfGeneration: number;
   hasHost: boolean;
-  hasCompanionHost: boolean;
+  hasSelfHost: boolean;
   hotProbe: string | null;
   hardReasons: Array<{ modId: string; kind: string }>;
   localIds: string[];
@@ -72,21 +72,21 @@ function readLive(modId: string): LiveSnapshot {
   }
   const generations = g.__sandkitHotGenerations__ ?? {};
   const hosts = g.__sandkitByMod ?? {};
-  const companion = hosts["dev-tools"];
-  const companionGet =
-    companion &&
-    companion.api &&
-    companion.api.settings &&
-    typeof companion.api.settings.get === "function"
-      ? companion.api.settings.get.bind(companion.api.settings)
+  const selfHost = hosts["dev-tools"];
+  const settingsGet =
+    selfHost &&
+    selfHost.api &&
+    selfHost.api.settings &&
+    typeof selfHost.api.settings.get === "function"
+      ? selfHost.api.settings.get.bind(selfHost.api.settings)
       : null;
-  const readCompanionBool = (key: string): boolean | null => {
-    if (!companionGet) return null;
-    const value = companionGet(key);
+  const readSettingBool = (key: string): boolean | null => {
+    if (!settingsGet) return null;
+    const value = settingsGet(key);
     return typeof value === "boolean" ? value : null;
   };
   const testHost = (g as typeof g & { __sandustryTestHost?: boolean }).__sandustryTestHost === true;
-  const watchValue = readCompanionBool("watchLocalMods");
+  const watchValue = readSettingBool("watchLocalMods");
   const hotProbe = g.__devToolsHotProbe;
   const hardReasons = Array.isArray(g.__devToolsHardReload?.reasons)
     ? g.__devToolsHardReload.reasons.filter(
@@ -96,13 +96,13 @@ function readLive(modId: string): LiveSnapshot {
     : [];
   return {
     watch: watchValue === true || testHost,
-    companionEnabled: readCompanionBool("enabled"),
+    enabled: readSettingBool("enabled"),
     scene: state?.store?.scene?.active ?? null,
     gameScene: sandkit?.enums?.Scene?.Game ?? null,
     generation: generations[modId] ?? 0,
-    companionGeneration: generations["dev-tools"] ?? 0,
+    selfGeneration: generations["dev-tools"] ?? 0,
     hasHost: Boolean(hosts[modId]),
-    hasCompanionHost: Boolean(hosts["dev-tools"]),
+    hasSelfHost: Boolean(hosts["dev-tools"]),
     hotProbe: typeof hotProbe === "string" ? hotProbe : null,
     hardReasons,
     localIds,
@@ -113,14 +113,14 @@ function readLive(modId: string): LiveSnapshot {
 type SkipReason = string | null;
 
 function skipReason(live: LiveSnapshot): SkipReason {
-  if (live.companionEnabled === false) return `${COMPANION_ID} is disabled`;
-  if (live.watch !== true) return "Watch local mods is off on the dev-tools companion";
+  if (live.enabled === false) return `${DEV_TOOLS_ID} is disabled`;
+  if (live.watch !== true) return "Watch local mods is off on Dev Tools";
   if (live.gameScene == null || live.scene !== live.gameScene)
     return "Sandustry is not in the Game scene";
-  if (!live.orderedIds.includes(COMPANION_ID)) return `${COMPANION_ID} is not loaded`;
+  if (!live.orderedIds.includes(DEV_TOOLS_ID)) return `${DEV_TOOLS_ID} is not loaded`;
   if (!live.localIds.includes(TEMPLATE_ID)) return `${TEMPLATE_ID} is not a local ordered mod`;
-  if (!live.hasCompanionHost) {
-    return `missing __sandkitByMod[${COMPANION_ID}]; restart after debugPatches`;
+  if (!live.hasSelfHost) {
+    return `missing __sandkitByMod[${DEV_TOOLS_ID}]; restart after debugPatches`;
   }
   if (!live.hasHost) {
     return `missing __sandkitByMod[${TEMPLATE_ID}]; restart after debugPatches`;
@@ -142,7 +142,7 @@ function hasHardReload(snapshot: LiveSnapshot, modId: string, kind: string): boo
 
 const game = await setupGame();
 
-test("dev-tools preflight: companion watch is on and template is local", async (t) => {
+test("dev-tools preflight: watch is on and template is local", async (t) => {
   const live = await game.evaluate(readLive, TEMPLATE_ID);
   const reason = skipReason(live);
   if (reason) {
@@ -156,7 +156,7 @@ test("dev-tools preflight: companion watch is on and template is local", async (
   }
 
   assert.equal(live.watch, true);
-  assert.ok(live.orderedIds.includes(COMPANION_ID));
+  assert.ok(live.orderedIds.includes(DEV_TOOLS_ID));
   assert.ok(live.localIds.includes(TEMPLATE_ID));
   assert.ok(main.includes(TOAST_PROBE));
 });
@@ -240,27 +240,27 @@ test("hot reload increments the generation counter", async (t) => {
   });
 });
 
-test("hot reload does not poll the companion mod main.js", async (t) => {
+test("hot reload does not poll this mod's main.js", async (t) => {
   const live = await game.evaluate(readLive, TEMPLATE_ID);
   const reason = skipReason(live);
   if (reason) {
     t.skip(reason);
     return;
   }
-  if (game.tryReadModMain(COMPANION_ID) === null) {
-    t.skip(`installed ${COMPANION_ID}/main.js is missing`);
+  if (game.tryReadModMain(DEV_TOOLS_ID) === null) {
+    t.skip(`installed ${DEV_TOOLS_ID}/main.js is missing`);
     return;
   }
 
   const token = `c${Date.now().toString(36)}`;
   const templateGenerationBefore = live.generation;
-  const companionGenerationBefore = live.companionGeneration;
+  const selfGenerationBefore = live.selfGeneration;
   await sleep(2000);
 
-  await game.withModMain(COMPANION_ID, async (file) => {
+  await game.withModMain(DEV_TOOLS_ID, async (file) => {
     const marker = `/* integration-dev-tools-self-poll ${token} */`;
     if (file.original.includes(marker)) {
-      t.skip("companion bundle already contains the integration marker");
+      t.skip("Dev Tools bundle already contains the integration marker");
       return;
     }
 
@@ -269,7 +269,7 @@ test("hot reload does not poll the companion mod main.js", async (t) => {
     await sleep(3000);
 
     const latest = await game.evaluate(readLive, TEMPLATE_ID);
-    assert.equal(latest.companionGeneration, companionGenerationBefore);
+    assert.equal(latest.selfGeneration, selfGenerationBefore);
     assert.equal(latest.generation, templateGenerationBefore);
   });
 });
@@ -317,26 +317,26 @@ test("patches.json change records a hard-reload probe", async (t) => {
     t.skip(reason);
     return;
   }
-  if (game.tryReadModFile(COMPANION_ID, "patches.json") === null) {
-    t.skip(`installed ${COMPANION_ID}/patches.json is missing`);
+  if (game.tryReadModFile(DEV_TOOLS_ID, "patches.json") === null) {
+    t.skip(`installed ${DEV_TOOLS_ID}/patches.json is missing`);
     return;
   }
 
   const generationBefore = live.generation;
   await sleep(2000);
 
-  await game.withModFile(COMPANION_ID, "patches.json", async (file) => {
+  await game.withModFile(DEV_TOOLS_ID, "patches.json", async (file) => {
     file.write(`${file.original}\n`);
     const latest = await game.waitFor(
       readLive,
-      (snapshot) => hasHardReload(snapshot, COMPANION_ID, "patches"),
+      (snapshot) => hasHardReload(snapshot, DEV_TOOLS_ID, "patches"),
       {
         timeoutMs: 12000,
         args: [TEMPLATE_ID],
         message: "hard reload probe did not record patches.json",
       },
     );
-    assert.equal(hasHardReload(latest, COMPANION_ID, "patches"), true);
+    assert.equal(hasHardReload(latest, DEV_TOOLS_ID, "patches"), true);
     assert.equal(latest.generation, generationBefore);
   });
 });
@@ -348,8 +348,8 @@ test("save reload does not apply a new patches.json marker (auto-nav stays off)"
     t.skip(reason);
     return;
   }
-  if (game.tryReadModFile(COMPANION_ID, "patches.json") === null) {
-    t.skip(`installed ${COMPANION_ID}/patches.json is missing`);
+  if (game.tryReadModFile(DEV_TOOLS_ID, "patches.json") === null) {
+    t.skip(`installed ${DEV_TOOLS_ID}/patches.json is missing`);
     return;
   }
   if (
@@ -373,7 +373,7 @@ test("save reload does not apply a new patches.json marker (auto-nav stays off)"
   await sleep(2000);
 
   await game.withModFile(WORKER_MOD_ID, "worker.js", async (workerFile) => {
-    await game.withModFile(COMPANION_ID, "patches.json", async (patchesFile) => {
+    await game.withModFile(DEV_TOOLS_ID, "patches.json", async (patchesFile) => {
       workerFile.write(appendWorkerToastProbe(workerFile.original, token));
       patchesFile.write(`${patchesFile.original}\n`);
 

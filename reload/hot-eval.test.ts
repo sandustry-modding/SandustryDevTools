@@ -305,15 +305,15 @@ test("hotEvalMain replaces overlay render by slot id on the target host", async 
   assert.deepEqual(Object.keys(template.overlays.hotbar), ["author.template"]);
 });
 
-test("hotEvalMain keeps the host inject prefix; companion host would mint dev-tools ids", async () => {
+test("hotEvalMain keeps the host inject prefix; a wrong host would mint dev-tools ids", async () => {
   const template = gameOverlayHost("author.template");
-  const companion = gameOverlayHost("dev-tools");
+  const devTools = gameOverlayHost("dev-tools");
   await hotEvalMain("author.template", INJECT_V1, template.host);
   assert.ok(template.overlays.global["author.template:author.template"]);
-  assert.equal(companion.overlays.global?.["dev-tools:author.template"], undefined);
+  assert.equal(devTools.overlays.global?.["dev-tools:author.template"], undefined);
 
-  await hotEvalMain("author.template", INJECT_V1, companion.host);
-  assert.ok(companion.overlays.global["dev-tools:author.template"]);
+  await hotEvalMain("author.template", INJECT_V1, devTools.host);
+  assert.ok(devTools.overlays.global["dev-tools:author.template"]);
   assert.equal(template.overlays.global["dev-tools:author.template"], undefined);
 });
 

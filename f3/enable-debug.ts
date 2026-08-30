@@ -13,7 +13,7 @@ function configRoot(api: SandkitApi): DebugConfigRoot | null {
 }
 
 /**
- * Keep engine `debug.active` on while the debug companion is enabled.
+ * Keep engine `debug.active` on while this mod is enabled.
  * Boot localStorage is updated so the next launch matches.
  */
 export function syncEngineDebug(api: SandkitApi): void {

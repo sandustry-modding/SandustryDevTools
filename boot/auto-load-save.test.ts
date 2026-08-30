@@ -1,18 +1,12 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import {
-  COMPANION_MOD_ID,
-  DEBUG_MOD_ID,
-  getStorageSaveId,
-  START_SAVE_STORAGE_KEY,
-} from "./auto-load-save.ts";
+import { DEBUG_MOD_ID, getStorageSaveId, START_SAVE_STORAGE_KEY } from "./auto-load-save.ts";
 
-test("DEBUG_MOD_ID matches companion mod id", () => {
-  assert.equal(DEBUG_MOD_ID, COMPANION_MOD_ID);
-  assert.equal(COMPANION_MOD_ID, "dev-tools");
+test("DEBUG_MOD_ID matches modinfo id", () => {
+  assert.equal(DEBUG_MOD_ID, "dev-tools");
 });
 
-test("getStorageSaveId reads companion storage only", () => {
+test("getStorageSaveId reads this mod's storage only", () => {
   const originalWindow = globalThis.window;
   Object.defineProperty(globalThis, "window", {
     value: { electron: { saveExistsSync: () => true } },

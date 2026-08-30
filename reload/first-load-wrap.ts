@@ -10,7 +10,7 @@ type WrapGlobals = typeof globalThis & {
 
 /**
  * Install the hot-reload sandkit wrap (dispose tracking) for other mods.
- * Safe to call from companion `main.js` even when other mods already evaluated.
+ * Safe to call from this mod's `main.js` even when other mods already evaluated.
  */
 export function installFirstLoadApiWrap(selfId: string): void {
   const g = globalThis as WrapGlobals;

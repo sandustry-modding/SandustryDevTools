@@ -94,7 +94,7 @@ export const debugPatches = definePatches([
     find: "const t=we(e,{manifest:o,discovered:r});e.store.integrity.modsUsed=!0,await c(t)",
     operation: "replace",
     // Stash the raw host for hot reload. Wrap the copy passed to `c` when
-    // `__devToolsWrapSandkit` is set (companion main installs dispose tracking).
+    // `__devToolsWrapSandkit` is set (this mod's main installs dispose tracking).
     code: "const t=we(e,{manifest:o,discovered:r});(globalThis.__sandkitByMod||(globalThis.__sandkitByMod={}))[o.id]=t;e.store.integrity.modsUsed=!0,await c((typeof globalThis.__devToolsWrapSandkit==='function'?globalThis.__devToolsWrapSandkit(o.id,t):t))",
     expectedMatches: 1,
   },
