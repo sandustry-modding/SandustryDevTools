@@ -14,7 +14,7 @@ import {
   watchKey,
 } from "./discover.ts";
 
-test("collectModIds skips the companion id and dedupes", () => {
+test("collectModIds skips this mod's id and dedupes", () => {
   assert.deepEqual(
     collectModIds(
       [
@@ -77,7 +77,7 @@ test("replaceAssetFile swaps the last path segment", () => {
   );
 });
 
-test("rewriteFileUrl uses self main for the companion", () => {
+test("rewriteFileUrl uses self main for this mod", () => {
   assert.equal(
     rewriteFileUrl("file:///mods/dev-tools/main.js", "dev-tools", "dev-tools", "worker.js"),
     "file:///mods/dev-tools/worker.js",
@@ -104,11 +104,15 @@ test("discoverLocalMods skips self", () => {
     { id: "author.template" },
   ]);
   assert.deepEqual(mods, [
-    { id: "author.template", mainUrl: "sandkit-workshop://author.template/main.js" },
+    {
+      id: "author.template",
+      mainUrl: "sandkit-workshop://author.template/main.js",
+      hasWorker: false,
+    },
   ]);
 });
 
-test("discoverWatchedFiles includes companion worker and patches", () => {
+test("discoverWatchedFiles skips worker.js when the mod has no worker", () => {
   const files = discoverWatchedFiles("dev-tools", "file:///mods/dev-tools/main.js", [
     {
       manifest: { id: "dev-tools" },
@@ -124,14 +128,42 @@ test("discoverWatchedFiles includes companion worker and patches", () => {
   assert.deepEqual(
     files.filter((f) => f.kind !== "main"),
     [
-      { id: "dev-tools", kind: "worker", url: "file:///mods/dev-tools/worker.js" },
       { id: "dev-tools", kind: "patches", url: "file:///mods/dev-tools/patches.json" },
-      { id: "author.template", kind: "worker", url: "file:///mods/author.template/worker.js" },
       { id: "author.template", kind: "patches", url: "file:///mods/author.template/patches.json" },
     ],
   );
+  assert.equal(
+    files.some((f) => f.kind === "worker"),
+    false,
+  );
   assert.ok(files.some((f) => f.id === "dev-tools" && f.kind === "main"));
   assert.ok(files.some((f) => f.id === "author.template" && f.kind === "main"));
+});
+
+test("discoverWatchedFiles polls worker.js when workerEntry is set", () => {
+  const files = discoverWatchedFiles("dev-tools", "file:///mods/dev-tools/main.js", [
+    {
+      manifest: { id: "dev-tools" },
+      rootUrl: "file:///mods/dev-tools/",
+      workshop: { itemId: null, discoveredVia: ["local"] },
+    },
+    {
+      manifest: { id: "example.worker-api", workerEntry: "worker.js" },
+      workerSource: "sandkit.api.worker.getIndex();",
+      rootUrl: "file:///mods/example.worker-api/",
+      workshop: { itemId: null, discoveredVia: ["local"] },
+    },
+  ]);
+  assert.deepEqual(
+    files.filter((f) => f.kind === "worker"),
+    [
+      {
+        id: "example.worker-api",
+        kind: "worker",
+        url: "file:///mods/example.worker-api/worker.js",
+      },
+    ],
+  );
 });
 
 test("modsStateFromStore reads __sandkitExternalRuntimeV1.order", () => {
@@ -182,7 +214,11 @@ test("discoverLocalMods polls local orderedMods and skips Workshop", () => {
     },
   ]);
   assert.deepEqual(mods, [
-    { id: "author.template", mainUrl: "file:///mods/author.template/main.js" },
+    {
+      id: "author.template",
+      mainUrl: "file:///mods/author.template/main.js",
+      hasWorker: false,
+    },
   ]);
 });
 

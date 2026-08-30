@@ -3,6 +3,7 @@ import { isLocalExternalMod, parseOrderedMod } from "../mod-inspector/mod-source
 export type LocalMod = {
   id: string;
   mainUrl: string;
+  hasWorker: boolean;
 };
 
 export type WatchedKind = "main" | "worker" | "patches";
@@ -65,7 +66,7 @@ function replaceOnce(haystack: string, from: string, to: string): string | null 
 }
 
 /**
- * Build another mod's `main.js` URL from this companion's `assets.getUrl("main.js")`.
+ * Build another mod's `main.js` URL from this mod's `assets.getUrl("main.js")`.
  * Falls back to `sandkit-workshop://<id>/main.js` when the self URL has no id folder.
  */
 export function rewriteMainUrl(selfMainUrl: string, selfId: string, otherId: string): string {
@@ -110,12 +111,36 @@ export function rewriteFileUrl(
   return replaceAssetFile(mainUrl, fileName);
 }
 
-export function watchedFilesFor(id: string, mainUrl: string): WatchedFile[] {
-  return (Object.keys(WATCHED_NAMES) as WatchedKind[]).map((kind) => ({
-    id,
-    kind,
-    url: replaceAssetFile(mainUrl, WATCHED_NAMES[kind]),
-  }));
+function hasWorkerFromRecord(entry: unknown): boolean {
+  if (!entry || typeof entry !== "object") return false;
+  const row = entry as Record<string, unknown>;
+  if (typeof row.workerSource === "string" && row.workerSource.length > 0) return true;
+  const manifest =
+    row.manifest && typeof row.manifest === "object"
+      ? (row.manifest as Record<string, unknown>)
+      : {};
+  const workerEntry = manifest.workerEntry ?? manifest.worker;
+  return typeof workerEntry === "string" && workerEntry.length > 0;
+}
+
+function recordById(modsState: unknown, id: string): unknown {
+  if (!Array.isArray(modsState)) return undefined;
+  for (const entry of modsState) {
+    const parsed = parseOrderedMod(entry);
+    if (parsed?.id === id) return entry;
+  }
+  return undefined;
+}
+
+export function watchedFilesFor(id: string, mainUrl: string, hasWorker = false): WatchedFile[] {
+  const files: WatchedFile[] = [
+    { id, kind: "main", url: replaceAssetFile(mainUrl, WATCHED_NAMES.main) },
+    { id, kind: "patches", url: replaceAssetFile(mainUrl, WATCHED_NAMES.patches) },
+  ];
+  if (hasWorker) {
+    files.push({ id, kind: "worker", url: replaceAssetFile(mainUrl, WATCHED_NAMES.worker) });
+  }
+  return files;
 }
 
 export function watchKey(id: string, kind: WatchedKind): string {
@@ -148,6 +173,7 @@ export function discoverLocalMods(
     return collectModIds(modsState, selfId).map((id) => ({
       id,
       mainUrl: rewriteMainUrl(selfMainUrl, selfId, id),
+      hasWorker: false,
     }));
   }
 
@@ -161,6 +187,7 @@ export function discoverLocalMods(
     ids.push({
       id: parsed.id,
       mainUrl: mainUrlFromRoot(parsed.rootUrl, parsed.id, selfMainUrl, selfId),
+      hasWorker: hasWorkerFromRecord(entry),
     });
   }
 
@@ -171,12 +198,13 @@ export function discoverLocalMods(
   return collectModIds(modsState, selfId).map((id) => ({
     id,
     mainUrl: rewriteMainUrl(selfMainUrl, selfId, id),
+    hasWorker: false,
   }));
 }
 
 /**
- * Local mods to poll, including this companion (for `worker.js` / `patches.json`).
- * Companion `main.js` is still skipped at apply time.
+ * Local mods to poll, including this mod (for `patches.json`, and `worker.js` when present).
+ * This mod's `main.js` is still skipped at apply time.
  */
 export function discoverWatchedFiles(
   selfId: string,
@@ -184,9 +212,10 @@ export function discoverWatchedFiles(
   modsState: unknown,
 ): WatchedFile[] {
   const siblings = discoverLocalMods(selfId, selfMainUrl, modsState);
-  const files: WatchedFile[] = [...watchedFilesFor(selfId, selfMainUrl)];
+  const selfHasWorker = hasWorkerFromRecord(recordById(modsState, selfId));
+  const files: WatchedFile[] = [...watchedFilesFor(selfId, selfMainUrl, selfHasWorker)];
   for (const mod of siblings) {
-    files.push(...watchedFilesFor(mod.id, mod.mainUrl));
+    files.push(...watchedFilesFor(mod.id, mod.mainUrl, mod.hasWorker));
   }
   return files;
 }

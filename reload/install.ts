@@ -7,6 +7,7 @@ import {
   type HardReloadKind,
 } from "./hard-reload.ts";
 import { hotEvalMain } from "./hot-eval.ts";
+import { reloadLog } from "./log.ts";
 import { sandkitHostForMod } from "./host.ts";
 import { decideReload, fetchMain } from "./poll.ts";
 import { applySettledWatch, classifyWatchAction } from "./watch.ts";
@@ -29,14 +30,15 @@ type FetchResult = {
 };
 
 /**
- * Poll local `main.js` (hot eval), `worker.js`, and `patches.json`.
- * Companion `main.js` is not re-evaled. Worker and patches toast for a process restart.
+ * Poll local `main.js` (hot eval), `patches.json`, and `worker.js` when the mod has a worker.
+ * This mod's `main.js` is not re-evaled. Worker and patches toast for a process restart.
  */
 export function installLocalModReload(api: SandkitApi, selfId: string): () => void {
-  const companionMain = selfMainUrl(api, selfId);
+  const selfMain = selfMainUrl(api, selfId);
   const lastApplied = new Map<string, string>();
   const pending = new Map<string, string>();
   const missingHost = new Set<string>();
+  const missingExtras = new Set<string>();
   let timer: ReturnType<typeof setTimeout> | undefined;
   let stopped = false;
 
@@ -45,7 +47,7 @@ export function installLocalModReload(api: SandkitApi, selfId: string): () => vo
     if (!host) {
       if (!missingHost.has(modId)) {
         missingHost.add(modId);
-        console.error(`hot reload skipped for ${modId}: missing sandkit host`);
+        reloadLog("error", `hot reload skipped for ${modId}: missing sandkit host`);
       }
       return;
     }
@@ -53,28 +55,34 @@ export function installLocalModReload(api: SandkitApi, selfId: string): () => vo
     try {
       const generation = await hotEvalMain(modId, text, host);
       lastApplied.set(key, text);
-      console.log(`Reloaded ${modId} v${generation}`);
+      reloadLog("log", `Reloaded ${modId} v${generation}`);
     } catch (error) {
-      console.error(`hot reload failed for ${modId}`, error);
+      reloadLog("error", `hot reload failed for ${modId}`, error);
     }
   }
 
   function applyHardReload(modId: string, kind: HardReloadKind, text: string, key: string): void {
     lastApplied.set(key, text);
     notifyHardReload(api, modId, kind);
-    console.warn(`hard reload needed: ${modId} ${kind}`);
+    reloadLog("warn", `hard reload needed: ${modId} ${kind}`);
     if (AUTO_SAVE_RELOAD_ON_HARD_RELOAD && inGame()) tryHardReloadSaveNav(api);
   }
 
   async function tick(): Promise<void> {
-    const files = discoverWatchedFiles(selfId, companionMain, readModsState());
+    const files = discoverWatchedFiles(selfId, selfMain, readModsState()).filter((file) => {
+      if (file.kind === "main") return true;
+      return !missingExtras.has(watchKey(file.id, file.kind));
+    });
     const fetched: FetchResult[] = await Promise.all(
       files.map(async (file) => ({ file, text: await fetchMain(file.url) })),
     );
 
     for (const { file, text } of fetched) {
-      if (text == null) continue;
       const key = watchKey(file.id, file.kind);
+      if (text == null) {
+        if (file.kind !== "main") missingExtras.add(key);
+        continue;
+      }
 
       const decision = decideReload(lastApplied.get(key), pending.get(key), text);
       if (decision === "skip") {
@@ -109,7 +117,7 @@ export function installLocalModReload(api: SandkitApi, selfId: string): () => vo
     try {
       await tick();
     } catch (error) {
-      console.error("hot reload poll failed", error);
+      reloadLog("error", "hot reload poll failed", error);
     }
     if (!stopped) timer = setTimeout(() => void loop(), POLL_MS);
   }
