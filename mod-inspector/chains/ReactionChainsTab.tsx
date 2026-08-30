@@ -6,7 +6,7 @@ import type { ElementRow } from "../elements/list-elements";
 import { FlowList } from "./ChainFlows";
 import { buildChainIndex, elementStepCount, type ChainIndex, type ChainStep } from "./chain-index";
 import { clearLiveEngineRecipesCache, loadLiveEngineRecipes } from "./live-engine-recipes";
-import { flowBlurb, stepsFor } from "./chain-tree";
+import { stepsFor } from "./chain-tree";
 import { KIND_COLOR, KIND_LABEL, type ReactionKind } from "./step-icons";
 
 const ALL_KINDS: ReactionKind[] = ["contact-mix", "element-mix", "machine", "burn", "structure"];
@@ -68,14 +68,10 @@ function PickerRow({
 function RootHeader({
   element,
   crumb,
-  doesBlurb,
-  fromBlurb,
   onBack,
 }: {
   element: ElementRow | undefined;
   crumb: number[];
-  doesBlurb: string;
-  fromBlurb: string;
   onBack: () => void;
 }) {
   if (!element) {
@@ -88,12 +84,12 @@ function RootHeader({
   const fill = tileFillCss(element.backgroundCss);
   const ink = contrastText(fill);
   return (
-    <div className="shrink-0 px-3 py-2.5 border-b border-slate-600 flex items-start gap-3">
+    <div className="shrink-0 px-3 py-2.5 border-b border-slate-600 flex items-center gap-3">
       {crumb.length > 0 ? (
         <button
           type="button"
           onClick={onBack}
-          className="text-[11px] text-slate-400 hover:text-[#ffe700] shrink-0 mt-1"
+          className="text-[11px] text-slate-400 hover:text-[#ffe700] shrink-0"
         >
           ← Back
         </button>
@@ -105,13 +101,9 @@ function RootHeader({
         <ElementPixel element={element} size={14} />
         {element.elementType}
       </span>
-      <div className="min-w-0 flex-1">
-        <p className="text-[14px] font-semibold text-[#ffe700] truncate leading-tight">
-          {element.name}
-        </p>
-        <p className="text-[11px] text-slate-200 leading-snug mt-1">{doesBlurb}</p>
-        <p className="text-[11px] text-slate-400 leading-snug">{fromBlurb}</p>
-      </div>
+      <p className="text-[14px] font-semibold text-[#ffe700] truncate leading-tight min-w-0 flex-1">
+        {element.name}
+      </p>
     </div>
   );
 }
@@ -265,8 +257,6 @@ export function ReactionChainsTab() {
 
   const doesCount = rootType == null ? 0 : stepsFor(index, rootType, "down", enabled).length;
   const fromCount = rootType == null ? 0 : stepsFor(index, rootType, "up", enabled).length;
-  const doesBlurb = rootType == null ? "" : flowBlurb(index, rootType, "down", enabled);
-  const fromBlurb = rootType == null ? "" : flowBlurb(index, rootType, "up", enabled);
 
   const rootElement = rootType != null ? index.elements.get(rootType) : undefined;
   const selectedStepId = selection?.kind === "step" ? selection.step.id : null;
@@ -409,13 +399,7 @@ export function ReactionChainsTab() {
         </aside>
 
         <div className="min-w-0 min-h-0 flex flex-col overflow-hidden bg-black/60">
-          <RootHeader
-            element={rootElement}
-            crumb={crumb}
-            doesBlurb={doesBlurb}
-            fromBlurb={fromBlurb}
-            onBack={goBack}
-          />
+          <RootHeader element={rootElement} crumb={crumb} onBack={goBack} />
           {rootType != null ? (
             <div
               className="flex-1 min-h-0 grid"

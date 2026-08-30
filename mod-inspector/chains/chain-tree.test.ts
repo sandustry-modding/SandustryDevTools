@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import type { ChainIndex, ChainStep } from "./chain-index.ts";
-import { flowBlurb, hopNeighbors, stepsFor } from "./chain-tree.ts";
+import { hopNeighbors, stepsFor } from "./chain-tree.ts";
 import type { ReactionKind } from "./step-icons.ts";
 
 const ALL_KINDS = new Set<ReactionKind>([
@@ -113,16 +113,6 @@ test("kind filter hides machine steps", () => {
   const does = stepsFor(fixtureIndex(), 2, "down", new Set(["structure"]));
   assert.equal(does.length, 1);
   assert.equal(does[0]!.label, "Collector");
-});
-
-test("does blurb reads Gold as the subject", () => {
-  const text = flowBlurb(fixtureIndex(), 2, "down", ALL_KINDS);
-  assert.equal(text, "Gold → Smelter → Liquid Gold (50%). Gold → Collector.");
-});
-
-test("from blurb reads toward Gold", () => {
-  const text = flowBlurb(fixtureIndex(), 2, "up", ALL_KINDS);
-  assert.equal(text, "Florin → Condenser → Gold (50%).");
 });
 
 test("down neighbors of smelter are liquid gold", () => {
