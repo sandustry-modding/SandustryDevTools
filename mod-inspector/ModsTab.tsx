@@ -74,7 +74,7 @@ function formatDiagnostic(entry: { code: string; modId: string | null; message: 
 }
 
 function ContributeBag({ bag, count, items }: { bag: string; count: number; items: string[] }) {
-  const [open, setOpen] = useState(count <= 12);
+  const [open, setOpen] = useState(false);
   return (
     <details
       open={open}
@@ -136,9 +136,7 @@ function ModDetailView({
           <p className="text-xs text-gray-500 truncate">
             Version {mod.version} • {mod.id}
           </p>
-          {mod.author ? (
-            <p className="text-xs text-gray-500 truncate">By {mod.author}</p>
-          ) : null}
+          {mod.author ? <p className="text-xs text-gray-500 truncate">By {mod.author}</p> : null}
         </div>
         <button
           type="button"
@@ -300,12 +298,14 @@ function SaveIssues({
       <button
         type="button"
         onClick={onToggle}
-        className="w-full flex items-center justify-between text-left py-1"
+        className="w-full flex items-center gap-2 text-left py-1"
       >
+        <span className="text-slate-500 inline-block w-3 text-center" aria-hidden="true">
+          {open ? "▾" : "▸"}
+        </span>
         <span className="text-[11px] uppercase tracking-wider text-amber-400">
           Save issues{count > 0 ? ` (${count})` : ""}
         </span>
-        <span className="text-slate-500 text-[12px]">{open ? "▾" : "▸"}</span>
       </button>
 
       {open ? (
