@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Removed: **Disable autosave**.
 - Changed: Chains tab no longer shows the selected-element header above Does / Comes from (left list and Selection panel already show it). Back stays when you drill into another element.
 
 ## 0.0.2

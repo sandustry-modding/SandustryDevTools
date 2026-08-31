@@ -22,12 +22,11 @@ This folder builds like any other `src/` mod. Debug commands (`npm run dev`, `--
 | **Auto-load save**        | `autoLoad`        | off         | On load, `location.assign` with `?db_load=<saveId>`. Skips splash and main menu. Legacy `autoBoot` prefs still count until you set `autoLoad`                           |
 | **Start save**            | `startSave`       | Mod storage | **Last played** or **Mod storage**. **Mod storage** reads `api.storage` (`startSave`). Set the id from DevTools or another mod.                                         |
 | **F3 debug overlay**      | `f3Debug`         | off         | F3 toggles the debug overlay. Vanilla Debug / Stats stay on while the mod is enabled                                                                                    |
-| **Disable autosave**      | `disableAutosave` | off         | Sets `session.settings.autosaveInterval` to `0`. Manual saves still work                                                                                                |
 | **Watch local mods**      | `watchLocalMods`  | off         | Poll other mods' `main.js` and re-eval the renderer bundle. Toast when `worker.js` or `patches.json` change (restart the game).                                         |
 | **Fast dev boot**         | `fastBoot`        | off         | Skip `foliage.generate` on boot. Raster, shadows, and shader compile stay vanilla. Writes `localStorage`. Needs `debugPatches` (dev). Restart once after you turn it on |
 | **Crisp canvas zoom**     | `crispCanvas`     | off         | Nearest-neighbour scaling on `#canvas` and `#overlay-canvas` so zoom stays sharp instead of blurry                                                                      |
 
-Turn on **Watch local mods**, **Fast dev boot**, **Auto-load save**, **F3 debug overlay**, **Crisp canvas zoom**, **Disable autosave**, **F12**, or **Open DevTools on load** when you want those helpers.
+Turn on **Watch local mods**, **Fast dev boot**, **Auto-load save**, **F3 debug overlay**, **Crisp canvas zoom**, **F12**, or **Open DevTools on load** when you want those helpers.
 
 ## Features
 
@@ -35,7 +34,6 @@ Turn on **Watch local mods**, **Fast dev boot**, **Auto-load save**, **F3 debug 
 - **Open DevTools on load** (`boot/boot-menu.ts`) — retries until the Electron bridge is ready. Keep off under F5 and while MCP is on `:9222`.
 - **F12 opens DevTools** (`boot/boot-menu.ts`) — capture-phase keydown.
 - **Auto-load save** (`boot/boot-menu.ts`, `boot/auto-load-save.ts`) — reloads with `?db_load=` for the **Start save** pick.
-- **Disable autosave** (`boot/autosave.ts`) — sets interval to `0` on load.
 - **F3 debug overlay** (`f3/F3DebugOverlay.tsx`) — Minecraft-style text HUD. Extend with `registerF3Section` / `globalThis.debugF3`.
 - **Dev Tools** (`mod-inspector/`) — pause **Dev Tools** opens a 1100×720 panel. **Mods** tab: compact loaded-mod cards; **Open** fills the tab with details (description first, then contributes, then load meta); save issues stay collapsed. **Elements**: family sand table. **Chains**: pick an element. **Does** and **Comes from** list recipe hops. Depth 1 is one hop. The index includes engine builtins (Wet Sand shaker, Residue burn, Burnt Residue press, Water contacts) because those rows are not in `mods.recipes`.
 - **Watch local mods** (`reload/`) — poll and re-eval other mods' renderer `main.js`. Toast when `worker.js` or `patches.json` change.

@@ -1,4 +1,3 @@
-import { disableSessionAutosave } from "./boot/autosave";
 import { registerDevToolsShortcut, scheduleMainMenuBoot } from "./boot/boot-menu";
 import { syncCrispCanvas } from "./boot/crisp-canvas";
 import { syncFastBootPrefs } from "./boot/fast-boot";
@@ -47,7 +46,6 @@ function main() {
   syncCrispCanvasSetting();
   if (settingOn(api, "f12DevTools")) registerDevToolsShortcut();
   scheduleMainMenuBoot(api);
-  if (settingOn(api, "disableAutosave")) disableSessionAutosave();
   installF3Debug(api, modinfo.id);
   installModInspector(api, modinfo.id);
   syncLocalModReload();

@@ -7,7 +7,7 @@
   "apiVersion": 1,
   "entry": "main.js",
   "author": "IrishBruse",
-  "description": "Watch local mods, DevTools, auto-load save, disable autosave, F3 overlay.",
+  "description": "Watch local mods, DevTools, auto-load save, F3 overlay.",
   "dependencies": [],
   "loadOrder": -2147483648,
   "configSchema": {
@@ -38,12 +38,6 @@
           "labelKey": "Mod storage"
         }
       ]
-    },
-    "disableAutosave": {
-      "type": "boolean",
-      "default": false,
-      "labelKey": "Disable autosave",
-      "descriptionKey": "Stop session autosave. Manual saves still work."
     },
     "watchLocalMods": {
       "type": "boolean",
