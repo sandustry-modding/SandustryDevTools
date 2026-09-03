@@ -35,7 +35,7 @@ function removeLocalStorage(key: string): void {
 }
 
 /**
- * Mirror boot prefs to localStorage so debugPatches can act before mods and assets load.
+ * Mirror boot prefs to localStorage so patches.json can act before mods and assets load.
  * Each setting mirrors only its own flag — fast boot does not enable the others.
  */
 export function syncFastBootPrefs(api: SandkitApi): void {

@@ -24,7 +24,7 @@ function syncLocalModReload(): void {
   }
 }
 
-/** Persist boot prefs so debugPatches can skip work that runs before this main.js. */
+/** Persist boot prefs so patches.json can skip work that runs before this main.js. */
 function syncBootPatches(): void {
   syncFastBootPrefs(api);
 }

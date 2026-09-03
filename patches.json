@@ -1,0 +1,90 @@
+[
+  {
+    "id": "early-auto-load-save",
+    "file": "js/bundle.js",
+    "find": "(async()=>{var e,t,n,r,o,a;try{await async function(){const e=(0,rr.M5)().locale",
+    "operation": "insertBefore",
+    "code": "(function(){try{var g=globalThis;if(!g.__hrBoot)g.__hrBoot={o:performance.now(),marks:[]};g.__hrMark=function(n){g.__hrBoot.marks.push({n:String(n),t:Math.round(performance.now()-g.__hrBoot.o)})};g.__hrMark(\"bundle\")}catch(e){}})();(function(){try{if(localStorage.getItem(\"dev-tools.autoLoad\")!==\"true\"||sessionStorage.getItem(\"dev-tools.autoLoadDone\"))return;const p=new URLSearchParams(location.search);if([\"new_game\",\"load\",\"db_load\",\"file_load\",\"custom_map\",\"external_map\"].some(function(k){return p.has(k)}))return;const id=localStorage.getItem(\"dev-tools.autoLoadSaveId\");if(!id)return;sessionStorage.setItem(\"dev-tools.autoLoadDone\",\"1\");const u=new URL(location.href);u.search=\"\";u.searchParams.set(\"db_load\",id);location.replace(u.toString())}catch(e){}})();",
+    "expectedMatches": 1
+  },
+  {
+    "id": "skip-splash-on-save-load",
+    "file": "js/bundle.js",
+    "find": "if(!e)if(sessionStorage.getItem(\"splashShown\")){",
+    "operation": "replace",
+    "code": "if(!e)if(sessionStorage.getItem(\"splashShown\")&&!new URLSearchParams(location.search).has(\"db_load\")){",
+    "expectedMatches": 1
+  },
+  {
+    "id": "boot-mark-starting-game",
+    "file": "js/bundle.js",
+    "find": "wL(\"ui|loading|startingGame\",7)",
+    "operation": "insertBefore",
+    "code": "(globalThis.__hrMark||function(){})(\"startingGame\");",
+    "expectedMatches": 1
+  },
+  {
+    "id": "boot-mark-save-load",
+    "file": "js/bundle.js",
+    "find": "await(0,le.Hh)(n.get(\"db_load\"))",
+    "operation": "replace",
+    "code": "await(async()=>{(globalThis.__hrMark||function(){})(\"saveLoad:start\");var x=await(0,le.Hh)(n.get(\"db_load\"));(globalThis.__hrMark||function(){})(\"saveLoad:done\");return x})()",
+    "expectedMatches": 1
+  },
+  {
+    "id": "boot-mark-sab-alloc",
+    "file": "js/bundle.js",
+    "find": "{environment:t,shared:a,simSab:l,sabDescriptor:i}}(C);",
+    "operation": "insertBefore",
+    "code": "(globalThis.__hrMark||function(){})(\"sabAlloc:start\"),",
+    "expectedMatches": 1
+  },
+  {
+    "id": "boot-mark-workers",
+    "file": "js/bundle.js",
+    "find": "await C.environment.multithreading.simulation.init(C,P)",
+    "operation": "replace",
+    "code": "await(async()=>{(globalThis.__hrMark||function(){})(\"workers:start\");await C.environment.multithreading.simulation.init(C,P);(globalThis.__hrMark||function(){})(\"workers:done\")})()",
+    "expectedMatches": 1
+  },
+  {
+    "id": "boot-mark-pj",
+    "file": "js/bundle.js",
+    "find": "if(await RE(e),t&&t.mods.length>0)",
+    "operation": "replace",
+    "code": "if(await(async()=>{(globalThis.__hrMark||function(){})(\"bindings:start\");var x=await RE(e);(globalThis.__hrMark||function(){})(\"bindings:done\");return x})(),t&&t.mods.length>0)",
+    "expectedMatches": 1
+  },
+  {
+    "id": "boot-mark-mods",
+    "file": "js/bundle.js",
+    "find": "r=await n(e,t.mods,t.diagnostics)",
+    "operation": "replace",
+    "code": "r=await(async()=>{(globalThis.__hrMark||function(){})(\"mods:start\");var x=await n(e,t.mods,t.diagnostics);(globalThis.__hrMark||function(){})(\"mods:done\");return x})()",
+    "expectedMatches": 1
+  },
+  {
+    "id": "boot-mark-loading-hide",
+    "file": "js/bundle.js",
+    "find": "const e=document.getElementById(\"loading\");e.style.opacity=\"0\"",
+    "operation": "insertBefore",
+    "code": "(globalThis.__hrMark||function(){})(\"loadingHide\");",
+    "expectedMatches": 1
+  },
+  {
+    "id": "stash-sandkit-by-mod",
+    "file": "js/external-mod-runtime.js",
+    "find": "const t=we(e,{manifest:o,discovered:r});e.store.integrity.modsUsed=!0,await c(t)",
+    "operation": "replace",
+    "code": "const t=we(e,{manifest:o,discovered:r});(globalThis.__sandkitByMod||(globalThis.__sandkitByMod={}))[o.id]=t;e.store.integrity.modsUsed=!0,await c((typeof globalThis.__devToolsWrapSandkit==='function'?globalThis.__devToolsWrapSandkit(o.id,t):t))",
+    "expectedMatches": 1
+  },
+  {
+    "id": "skip-start-foliage-generate",
+    "file": "js/bundle.js",
+    "find": "await se.FH.foliage.generate()",
+    "operation": "replace",
+    "code": "await(async()=>{(globalThis.__hrMark||function(){})(\"foliage:start\");var x=localStorage.getItem(\"dev-tools.fastBoot\")===\"true\"?undefined:await se.FH.foliage.generate();(globalThis.__hrMark||function(){})(\"foliage:done\");return x})()",
+    "expectedMatches": 1
+  }
+]

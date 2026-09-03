@@ -10,7 +10,7 @@ Settings live on this mod. Open **Options → Mods → Dev Tools**.
 
 ## Builds
 
-This folder builds like any other `src/` mod. Debug commands (`npm run dev`, `--watch`, `--game`, `--debug`) include `debugPatches`. Release commands (`npm run build`, `npm run dev:release`) omit them. `--mod irishbruse.dev-tools` builds only this folder.
+This folder builds like any other `src/` mod. Boot helpers live in `patches.json` (always applied). `--mod irishbruse.dev-tools` builds only this folder.
 
 ## Settings
 
@@ -23,7 +23,7 @@ This folder builds like any other `src/` mod. Debug commands (`npm run dev`, `--
 | **Start save**            | `startSave`       | Mod storage | **Last played** or **Mod storage**. **Mod storage** reads `api.storage` (`startSave`). Set the id from DevTools or another mod.                                         |
 | **F3 debug overlay**      | `f3Debug`         | off         | F3 toggles the debug overlay. Vanilla Debug / Stats stay on while the mod is enabled                                                                                    |
 | **Watch local mods**      | `watchLocalMods`  | off         | Poll other mods' `main.js` and re-eval the renderer bundle. Toast when `worker.js` or `patches.json` change (restart the game).                                         |
-| **Fast dev boot**         | `fastBoot`        | off         | Skip `foliage.generate` on boot. Raster, shadows, and shader compile stay vanilla. Writes `localStorage`. Needs `debugPatches` (dev). Restart once after you turn it on |
+| **Fast dev boot**         | `fastBoot`        | off         | Skip `foliage.generate` on boot. Raster, shadows, and shader compile stay vanilla. Writes `localStorage`. Needs the boot patches in `patches.json`. Restart once after you turn it on |
 | **Crisp canvas zoom**     | `crispCanvas`     | off         | Nearest-neighbour scaling on `#canvas` and `#overlay-canvas` so zoom stays sharp instead of blurry                                                                      |
 
 Turn on **Watch local mods**, **Fast dev boot**, **Auto-load save**, **F3 debug overlay**, **Crisp canvas zoom**, **F12**, or **Open DevTools on load** when you want those helpers.
@@ -37,7 +37,7 @@ Turn on **Watch local mods**, **Fast dev boot**, **Auto-load save**, **F3 debug 
 - **F3 debug overlay** (`f3/F3DebugOverlay.tsx`) — Minecraft-style text HUD. Extend with `registerF3Section` / `globalThis.debugF3`.
 - **Dev Tools** (`mod-inspector/`) — pause **Dev Tools** opens a 1100×720 panel. **Mods** tab: compact loaded-mod cards; **Open** fills the tab with details (description first, then contributes, then load meta); save issues stay collapsed. **Elements**: family sand table. **Chains**: pick an element. **Does** and **Comes from** list recipe hops. Depth 1 is one hop. The index includes engine builtins (Wet Sand shaker, Residue burn, Burnt Residue press, Water contacts) because those rows are not in `mods.recipes`.
 - **Watch local mods** (`reload/`) — poll and re-eval other mods' renderer `main.js`. Toast when `worker.js` or `patches.json` change.
-- **Fast dev boot** (`patches.ts`, `boot/fast-boot.ts`) — when on, skips `foliage.generate` only. Raster fill, shadow rebuild, and outline compile stay vanilla. Needs `debugPatches` (dev). Restart once after you turn it on.
+- **Fast dev boot** (`patches.json`, `boot/fast-boot.ts`) — when on, skips `foliage.generate` only. Raster fill, shadow rebuild, and outline compile stay vanilla. Restart once after you turn it on.
 - **Crisp canvas zoom** (`boot/crisp-canvas.ts`) — injects `image-rendering: pixelated` on the world canvases. Toggle in **Options → Mods → dev-tools**.
 
 ## DevTools globals
@@ -119,7 +119,7 @@ It does not:
 - Reload `worker.js` into sim workers
 - Re-apply `patches.json`
 
-Restart the game (stop and start / F5) for workers and patches. Restart once after a `debugPatches` change (the per-mod `sandkit` stash is a debug patch).
+Restart the game (stop and start / F5) for workers and patches. Restart once after a `patches.json` change (the per-mod `sandkit` stash is a boot patch).
 
 ## Changelog
 

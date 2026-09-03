@@ -120,10 +120,10 @@ function skipReason(live: LiveSnapshot): SkipReason {
   if (!live.orderedIds.includes(DEV_TOOLS_ID)) return `${DEV_TOOLS_ID} is not loaded`;
   if (!live.localIds.includes(TEMPLATE_ID)) return `${TEMPLATE_ID} is not a local ordered mod`;
   if (!live.hasSelfHost) {
-    return `missing __sandkitByMod[${DEV_TOOLS_ID}]; restart after debugPatches`;
+    return `missing __sandkitByMod[${DEV_TOOLS_ID}]; restart after patches.json`;
   }
   if (!live.hasHost) {
-    return `missing __sandkitByMod[${TEMPLATE_ID}]; restart after debugPatches`;
+    return `missing __sandkitByMod[${TEMPLATE_ID}]; restart after patches.json`;
   }
   return null;
 }
