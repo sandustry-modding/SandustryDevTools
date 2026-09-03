@@ -8,8 +8,8 @@ import vm from "node:vm";
 
 const ROOT = dirname(dirname(dirname(fileURLToPath(import.meta.url))));
 const HERE = dirname(fileURLToPath(import.meta.url));
-const BUNDLE = join(ROOT, "sandustry/0.5.5-mods/dist/js/bundle.js");
-const WORKSHOP = join(ROOT, "sandustry/0.5.5-mods/workshop-mods.js");
+const BUNDLE = join(ROOT, "sandustry/source/dist/js/bundle.js");
+const WORKSHOP = join(ROOT, "sandustry/source/workshop-mods.js");
 const PATCHES = JSON.parse(readFileSync(join(HERE, "patches.json"), "utf8")) as {
   id: string;
   file: string;
