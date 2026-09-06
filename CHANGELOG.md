@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Changed: **F3** shows only the live-config panel in the top-left.
+  Rows use raw keys.
+  Worker sim reads those edits through a shared buffer.
+- Changed: live config edits sit on the **F3** overlay.
+  The pause Dev Tools **Config** tab is gone.
 - Removed: all `patches.json` boot patches, **Fast dev boot**, and MCP boot timing marks (`__hrBoot` / `__hrMark`).
 - Removed: **Watch local mods** and renderer hot reload (polling, sandkit wrap, and the `stash-sandkit-by-mod` patch).
 - Removed: **Disable autosave**.

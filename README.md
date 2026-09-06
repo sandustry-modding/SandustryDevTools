@@ -12,15 +12,15 @@ This folder builds like any other `src/` mod. `--mod irishbruse.dev-tools` build
 
 ## Settings
 
-| Setting                   | Key               | Default     | Effect                                                                                                                                                                  |
-| ------------------------- | ----------------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Mod enabled**           | `enabled`         | on          | Master switch for runtime helpers                                                                                                                                       |
-| **Open DevTools on load** | `openDevTools`    | off         | Open Electron DevTools on load. Keep off under F5 and while MCP is on `:9222`                                                                                           |
-| **F12 opens DevTools**    | `f12DevTools`     | off         | Capture-phase F12. Can disconnect an IDE debugger session                                                                                                               |
-| **Auto-load save**        | `autoLoad`        | off         | On first load, `location.assign` with `?db_load=<saveId>`. Legacy `autoBoot` prefs still count until you set `autoLoad`                                                 |
-| **Start save**            | `startSave`       | Mod storage | **Last played** or **Mod storage**. **Mod storage** reads `api.storage` (`startSave`). Set the id from DevTools or another mod.                                         |
-| **F3 debug overlay**      | `f3Debug`         | off         | F3 toggles the debug overlay. Vanilla Debug / Stats stay on while the mod is enabled                                                                                    |
-| **Crisp canvas zoom**     | `crispCanvas`     | off         | Nearest-neighbour scaling on `#canvas` and `#overlay-canvas` so zoom stays sharp instead of blurry                                                                      |
+| Setting                   | Key            | Default     | Effect                                                                                                                          |
+| ------------------------- | -------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| **Mod enabled**           | `enabled`      | on          | Master switch for runtime helpers                                                                                               |
+| **Open DevTools on load** | `openDevTools` | off         | Open Electron DevTools on load. Keep off under F5 and while MCP is on `:9222`                                                   |
+| **F12 opens DevTools**    | `f12DevTools`  | off         | Capture-phase F12. Can disconnect an IDE debugger session                                                                       |
+| **Auto-load save**        | `autoLoad`     | off         | On first load, `location.assign` with `?db_load=<saveId>`. Legacy `autoBoot` prefs still count until you set `autoLoad`         |
+| **Start save**            | `startSave`    | Mod storage | **Last played** or **Mod storage**. **Mod storage** reads `api.storage` (`startSave`). Set the id from DevTools or another mod. |
+| **F3 debug overlay**      | `f3Debug`      | off         | F3 toggles the debug overlay. Vanilla Debug / Stats stay on while the mod is enabled                                            |
+| **Crisp canvas zoom**     | `crispCanvas`  | off         | Nearest-neighbour scaling on `#canvas` and `#overlay-canvas` so zoom stays sharp instead of blurry                              |
 
 Turn on **Auto-load save**, **F3 debug overlay**, **Crisp canvas zoom**, **F12**, or **Open DevTools on load** when you want those helpers.
 
@@ -30,9 +30,24 @@ Turn on **Auto-load save**, **F3 debug overlay**, **Crisp canvas zoom**, **F12**
 - **Open DevTools on load** (`boot/boot-menu.ts`) — retries until the Electron bridge is ready. Keep off under F5 and while MCP is on `:9222`.
 - **F12 opens DevTools** (`boot/boot-menu.ts`) — capture-phase keydown.
 - **Auto-load save** (`boot/boot-menu.ts`, `boot/auto-load-save.ts`) — on first load, reloads with `?db_load=` for the **Start save** pick.
-- **F3 debug overlay** (`f3/F3DebugOverlay.tsx`) — Minecraft-style text HUD. Extend with `registerF3Section` / `globalThis.debugF3`.
-- **Dev Tools** (`mod-inspector/`) — pause **Dev Tools** opens a 1100×720 panel. **Mods** tab: compact loaded-mod cards; **Open** fills the tab with details (description first, then contributes, then load meta); save issues stay collapsed. **Elements**: family sand table. **Chains**: pick an element. **Does** and **Comes from** list recipe hops. Depth 1 is one hop. The index includes engine builtins (Wet Sand shaker, Residue burn, Burnt Residue press, Water contacts) because those rows are not in `mods.recipes`.
+- **F3 debug overlay** (`f3/F3DebugOverlay.tsx`) — live-config panel in the top-left from `createLiveConfig`.
+- **Dev Tools** (`mod-inspector/`) — pause **Dev Tools** opens a 1100×720 panel.
+  **Mods** tab: compact loaded-mod cards; **Open** fills the tab with details.
+  **Elements**: family sand table.
+  **Chains**: pick an element.
+  **Does** and **Comes from** list recipe hops.
+  Depth 1 is one hop.
+  The index includes engine builtins (Wet Sand shaker, Residue burn, Burnt Residue press, Water contacts) because those rows are not in `mods.recipes`.
 - **Crisp canvas zoom** (`boot/crisp-canvas.ts`) — injects `image-rendering: pixelated` on the world canvases. Toggle in **Options → Mods → dev-tools**.
+
+## Live config
+
+Other mods call `createLiveConfig` from `@modkit/utils`.
+Turn on **F3 debug overlay**.
+Press **F3**.
+The top-left panel lists those handles.
+Each field writes the named `globalThis` object.
+See [live-config.md](https://github.com/IrishBruse/SandustryModTemplate/blob/main/docs/modkit/live-config.md) in the template kit.
 
 ## DevTools globals
 
@@ -73,21 +88,8 @@ It does nothing when:
 
 ## F3 debug overlay
 
-When **F3 debug overlay** is on, **F3** toggles a Minecraft-style text overlay. Built-in sections show **Player** world/cell position and **Mouse** cell/world position while in-game. Vanilla Debug / Stats stay on while this mod is enabled.
-
-Add sections from this mod:
-
-```ts
-import { registerF3Section } from "../f3/registry";
-
-registerF3Section({
-  id: "my-stats",
-  title: "My mod",
-  lines: () => [{ left: "Foo", right: "42" }],
-});
-```
-
-After boot, `globalThis.debugF3.registerSection` is the same API for DevTools experiments.
+When **F3 debug overlay** is on, **F3** toggles the live-config panel in the top-left.
+Vanilla Debug / Stats stay on while this mod is enabled.
 
 ## Changelog
 
