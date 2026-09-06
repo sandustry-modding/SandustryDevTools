@@ -1,24 +1,13 @@
 import { useEffect, useState, type WheelEvent } from "react";
 import { OptionsButton, OptionsNumberInput, OptionsRow, OptionsSwitch } from "@modkit/ui";
 import {
-  LIVE_CONFIG_GROUP_ORDER,
+  formatLiveConfigDefaults,
+  groupLiveConfigFields,
   listLiveConfigs,
   subscribeLiveConfig,
   type LiveConfigEntry,
   type LiveConfigField,
 } from "@modkit/utils/live-config";
-
-function groupFields(fields: LiveConfigField[]): { group: string; fields: LiveConfigField[] }[] {
-  const buckets = new Map<string, LiveConfigField[]>();
-  for (const field of fields) {
-    const list = buckets.get(field.group) ?? [];
-    list.push(field);
-    buckets.set(field.group, list);
-  }
-  const ranked = LIVE_CONFIG_GROUP_ORDER.filter((group) => buckets.has(group));
-  const extra = [...buckets.keys()].filter((group) => !LIVE_CONFIG_GROUP_ORDER.includes(group));
-  return [...ranked, ...extra].map((group) => ({ group, fields: buckets.get(group) ?? [] }));
-}
 
 function FieldControl({
   entry,
@@ -54,6 +43,7 @@ function FieldControl({
 /** Interactive live-config editor on the F3 overlay. */
 export function F3LiveConfigPanel() {
   const [, setTick] = useState(0);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => subscribeLiveConfig(() => setTick((n) => n + 1)), []);
   useEffect(() => {
@@ -65,10 +55,21 @@ export function F3LiveConfigPanel() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const active = entries.find((entry) => entry.id === selectedId) ?? entries[0] ?? null;
   const values = active?.get() ?? {};
-  const groups = active ? groupFields(active.fields) : [];
+  const groups = active ? groupLiveConfigFields(active.fields) : [];
 
   function stopWorld(event: WheelEvent<HTMLDivElement> | { stopPropagation(): void }): void {
     event.stopPropagation();
+  }
+
+  async function copyDefaults(): Promise<void> {
+    if (!active) return;
+    try {
+      await navigator.clipboard.writeText(formatLiveConfigDefaults(active));
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1500);
+    } catch {
+      setCopied(false);
+    }
   }
 
   return (
@@ -123,11 +124,20 @@ export function F3LiveConfigPanel() {
                   <p className="text-[10px] text-slate-500 font-mono truncate">
                     {active.globalKey}
                   </p>
-                  <OptionsButton onClick={() => active.reset()}>Reset</OptionsButton>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <OptionsButton onClick={() => void copyDefaults()}>
+                      {copied ? "Copied" : "Copy"}
+                    </OptionsButton>
+                    <OptionsButton onClick={() => active.reset()}>Reset</OptionsButton>
+                  </div>
                 </div>
-                {groups.map((section) => (
+                {groups.map((section, index) => (
                   <div key={section.group}>
-                    <div className="text-[10px] text-slate-500 font-mono pt-2 pb-1">
+                    <div
+                      className={`text-xs font-bold uppercase tracking-widest text-[#ffe700] pb-1 ${
+                        index === 0 ? "pt-0" : "pt-3 mt-1 border-t border-slate-800/50"
+                      }`}
+                    >
                       {section.group}
                     </div>
                     {section.fields.map((field) => (
