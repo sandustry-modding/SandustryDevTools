@@ -72,14 +72,6 @@
     "expectedMatches": 1
   },
   {
-    "id": "stash-sandkit-by-mod",
-    "file": "js/external-mod-runtime.js",
-    "find": "const t=we(e,{manifest:o,discovered:r});e.store.integrity.modsUsed=!0,await c(t)",
-    "operation": "replace",
-    "code": "const t=we(e,{manifest:o,discovered:r});(globalThis.__sandkitByMod||(globalThis.__sandkitByMod={}))[o.id]=t;e.store.integrity.modsUsed=!0,await c((typeof globalThis.__devToolsWrapSandkit==='function'?globalThis.__devToolsWrapSandkit(o.id,t):t))",
-    "expectedMatches": 1
-  },
-  {
     "id": "skip-start-foliage-generate",
     "file": "js/bundle.js",
     "find": "await se.FH.foliage.generate()",

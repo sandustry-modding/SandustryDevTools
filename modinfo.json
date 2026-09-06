@@ -7,7 +7,7 @@
   "apiVersion": 1,
   "entry": "main.js",
   "author": "IrishBruse",
-  "description": "Watch local mods, DevTools, auto-load save, F3 overlay.",
+  "description": "DevTools, auto-load save, F3 overlay.",
   "dependencies": [],
   "loadOrder": -2147483648,
   "configSchema": {
@@ -38,12 +38,6 @@
           "labelKey": "Mod storage"
         }
       ]
-    },
-    "watchLocalMods": {
-      "type": "boolean",
-      "default": false,
-      "labelKey": "Watch local mods",
-      "descriptionKey": "Re-eval other mods' main.js. Toast when worker.js or patches.json change (restart the game)."
     },
     "fastBoot": {
       "type": "boolean",
