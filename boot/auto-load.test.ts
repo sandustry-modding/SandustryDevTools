@@ -1,13 +1,37 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
-  BOOT_QUERY_KEYS,
+  AUTO_LOAD_SESSION_KEY,
+  autoLoadSessionDone,
   buildAutoLoadUrl,
-  earlyAutoLoadPatchIife,
   isBootQueryActive,
+  markAutoLoadSessionDone,
   shouldAutoLoad,
 } from "./auto-load.ts";
-import { AUTO_LOAD_STORAGE_KEY } from "./fast-boot-keys.ts";
+
+function mockStorage(): Storage {
+  const map = new Map<string, string>();
+  return {
+    get length() {
+      return map.size;
+    },
+    clear() {
+      map.clear();
+    },
+    getItem(key: string) {
+      return map.has(key) ? map.get(key)! : null;
+    },
+    key(index: number) {
+      return [...map.keys()][index] ?? null;
+    },
+    removeItem(key: string) {
+      map.delete(key);
+    },
+    setItem(key: string, value: string) {
+      map.set(key, value);
+    },
+  };
+}
 
 test("isBootQueryActive matches known boot query keys", () => {
   assert.equal(isBootQueryActive("?db_load=abc"), true);
@@ -63,10 +87,22 @@ test("buildAutoLoadUrl clears other query params", () => {
   assert.equal(url.search, "?db_load=save-1");
 });
 
-test("earlyAutoLoadPatchIife uses shared boot keys", () => {
-  const code = earlyAutoLoadPatchIife();
-  assert.match(code, new RegExp(AUTO_LOAD_STORAGE_KEY));
-  for (const key of BOOT_QUERY_KEYS) {
-    assert.match(code, new RegExp(key));
+test("autoLoadSessionDone uses the current session key only", () => {
+  const session = mockStorage();
+  const originalSession = globalThis.sessionStorage;
+  Object.defineProperty(globalThis, "sessionStorage", { value: session, configurable: true });
+  try {
+    assert.equal(autoLoadSessionDone(), false);
+    session.setItem("irishbruse.debug:autoLoadDone", "1");
+    session.setItem("hot-reload.autoLoadDone", "1");
+    assert.equal(autoLoadSessionDone(), false);
+    markAutoLoadSessionDone();
+    assert.equal(session.getItem(AUTO_LOAD_SESSION_KEY), "1");
+    assert.equal(autoLoadSessionDone(), true);
+  } finally {
+    Object.defineProperty(globalThis, "sessionStorage", {
+      value: originalSession,
+      configurable: true,
+    });
   }
 });

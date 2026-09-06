@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Removed: all `patches.json` boot patches, **Fast dev boot**, and MCP boot timing marks (`__hrBoot` / `__hrMark`).
 - Removed: **Watch local mods** and renderer hot reload (polling, sandkit wrap, and the `stash-sandkit-by-mod` patch).
 - Removed: **Disable autosave**.
 - Changed: Chains tab no longer shows the selected-element header above Does / Comes from (left list and Selection panel already show it). Back stays when you drill into another element.

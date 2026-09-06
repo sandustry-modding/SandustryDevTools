@@ -21,7 +21,7 @@
       "type": "boolean",
       "default": false,
       "labelKey": "Auto-load save",
-      "descriptionKey": "Skip splash and main menu. Loads the save below."
+      "descriptionKey": "On first load, navigate to the save below with ?db_load=."
     },
     "startSave": {
       "type": "choice",
@@ -38,12 +38,6 @@
           "labelKey": "Mod storage"
         }
       ]
-    },
-    "fastBoot": {
-      "type": "boolean",
-      "default": false,
-      "labelKey": "Fast dev boot",
-      "descriptionKey": "Skip foliage generate on boot (dev). Raster and shaders stay vanilla. Restart once after you turn it on."
     },
     "openDevTools": {
       "type": "boolean",

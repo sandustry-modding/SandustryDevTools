@@ -7,6 +7,5 @@ export const SETTING_DEFAULTS: Record<string, boolean> = {
   f12DevTools: false,
   autoLoad: false,
   f3Debug: false,
-  fastBoot: false,
   crispCanvas: false,
 };

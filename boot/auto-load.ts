@@ -1,5 +1,3 @@
-import { AUTO_LOAD_SAVE_ID_STORAGE_KEY, AUTO_LOAD_STORAGE_KEY } from "./fast-boot-keys.ts";
-
 /** Query keys that already start a game boot (same list as the game bundle). */
 export const BOOT_QUERY_KEYS = [
   "new_game",
@@ -27,7 +25,7 @@ export function isBootQueryActive(search = window.location.search): boolean {
   return BOOT_QUERY_KEYS.some((key) => params.has(key));
 }
 
-/** True when this browser session already ran auto-load (early patch or late fallback). */
+/** True when this browser session already ran auto-load. */
 export function autoLoadSessionDone(): boolean {
   try {
     return sessionStorage.getItem(AUTO_LOAD_SESSION_KEY) === "1";
@@ -44,7 +42,7 @@ export function markAutoLoadSessionDone(): void {
   }
 }
 
-/** Build the `?db_load=` URL used by early and late auto-load redirects. */
+/** Build the `?db_load=` URL used by auto-load redirects. */
 export function buildAutoLoadUrl(saveId: string, href = window.location.href): URL {
   const url = new URL(href);
   url.search = "";
@@ -52,17 +50,8 @@ export function buildAutoLoadUrl(saveId: string, href = window.location.href): U
   return url;
 }
 
-/** Shared gate for early patch IIFE and late `tryAutoLoadSave`. */
+/** Shared gate for late auto-load in `tryAutoLoadSave`. */
 export function shouldAutoLoad(ctx: AutoLoadContext): boolean {
   if (ctx.inGame || ctx.sessionDone || !ctx.autoLoadEnabled || !ctx.saveId) return false;
   return !isBootQueryActive(ctx.search);
-}
-
-/**
- * Early auto-load IIFE inserted into `js/bundle.js` before mods run.
- * Reads the same localStorage keys mirrored by `syncFastBootPrefs`.
- */
-export function earlyAutoLoadPatchIife(): string {
-  const keys = JSON.stringify(BOOT_QUERY_KEYS);
-  return `(function(){try{if(localStorage.getItem(${JSON.stringify(AUTO_LOAD_STORAGE_KEY)})!=="true"||sessionStorage.getItem(${JSON.stringify(AUTO_LOAD_SESSION_KEY)}))return;const p=new URLSearchParams(location.search);if(${keys}.some(function(k){return p.has(k)}))return;const id=localStorage.getItem(${JSON.stringify(AUTO_LOAD_SAVE_ID_STORAGE_KEY)});if(!id)return;sessionStorage.setItem(${JSON.stringify(AUTO_LOAD_SESSION_KEY)},"1");const u=new URL(location.href);u.search="";u.searchParams.set("db_load",id);location.replace(u.toString())}catch(e){}})();`;
 }
