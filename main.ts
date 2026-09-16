@@ -26,8 +26,6 @@ function main() {
   api.settings.onChange(() => {
     syncCrispCanvasSetting();
   });
-
-  console.log("Loaded");
 }
 
 main();
