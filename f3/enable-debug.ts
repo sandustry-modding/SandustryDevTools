@@ -17,7 +17,7 @@ function configRoot(api: SandkitApi): DebugConfigRoot | null {
  * Boot localStorage is updated so the next launch matches.
  */
 export function syncEngineDebug(api: SandkitApi): void {
-  const on = isEnabled(api);
+  const on = isEnabled();
 
   try {
     localStorage.setItem("debug.active", String(on));

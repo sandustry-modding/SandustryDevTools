@@ -13,7 +13,7 @@ function syncCrispCanvasSetting(): void {
 }
 
 function main() {
-  if (!isEnabled(api)) return;
+  if (!isEnabled()) return;
 
   const { enums, react } = sandkit;
   Object.assign(globalThis, { sandkit, api, enums, react });

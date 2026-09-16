@@ -11,14 +11,14 @@ function boolSetting(api: SandkitApi, key: string): boolean {
 
 /** True when the master switch and this key are on. */
 export function settingOn(api: SandkitApi, key: string): boolean {
-  return isEnabled(api) && boolSetting(api, key);
+  return isEnabled() && boolSetting(api, key);
 }
 
 /**
  * F3 debug overlay. Honours legacy `engineDebug` when `f3Debug` is not stored yet.
  */
 export function f3DebugOn(api: SandkitApi): boolean {
-  if (!isEnabled(api)) return false;
+  if (!isEnabled()) return false;
   const f3Debug = api.settings.get("f3Debug");
   if (typeof f3Debug === "boolean") return f3Debug;
   const legacy = api.settings.get("engineDebug");
@@ -31,7 +31,7 @@ export function f3DebugOn(api: SandkitApi): boolean {
  * (prefs from before splash/Continue helpers were replaced).
  */
 export function autoLoadOn(api: SandkitApi): boolean {
-  if (!isEnabled(api)) return false;
+  if (!isEnabled()) return false;
   const autoLoad = api.settings.get("autoLoad");
   if (typeof autoLoad === "boolean") return autoLoad;
   const legacy = api.settings.get("autoBoot");
