@@ -1,3 +1,5 @@
+import { t } from "@modkit/utils";
+
 /** Icons and labels for reaction chain steps. */
 
 export type ReactionKind = "contact-mix" | "element-mix" | "machine" | "burn" | "structure";
@@ -138,14 +140,9 @@ export function structureLabel(ref: string | number): string {
       const def = sandkit.api.structures.getDefinitionByType(ref);
       const key = def?.nameKey;
       if (typeof key === "string" && key) {
-        try {
-          const text = sandkit.api.i18n.t(key);
-          if (typeof text === "string" && text && text !== key) return text;
-        } catch {
-          /* ignore */
-        }
         const match = /^structures\|([^|]+)\|/.exec(key);
-        if (match) return titleCase(match[1]!);
+        const text = t(key, match ? titleCase(match[1]!) : undefined);
+        if (text !== key) return text;
       }
       return `structure ${ref}`;
     }
@@ -156,12 +153,11 @@ export function structureLabel(ref: string | number): string {
       const def = sandkit.api.structures.getDefinitionByType(type);
       if (typeof def?.name === "string" && def.name && def.name !== ref) return def.name;
       if (typeof def?.nameKey === "string") {
-        try {
-          const text = sandkit.api.i18n.t(def.nameKey);
-          if (typeof text === "string" && text && text !== def.nameKey) return text;
-        } catch {
-          /* ignore */
-        }
+        const text = t(
+          def.nameKey,
+          typeof def.name === "string" && def.name !== ref ? def.name : undefined,
+        );
+        if (text !== def.nameKey) return text;
       }
     }
     return titleCase(ref);
