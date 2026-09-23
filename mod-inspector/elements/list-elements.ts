@@ -42,28 +42,7 @@ export type ElementRow = {
   description: string | null;
 };
 
-type LiveDefinition = ReturnType<typeof api.elements.getDefinitionByType> & {
-  description?: string;
-  descriptionKey?: string;
-  metaColor?: number;
-  materialId?: number;
-  hidden?: boolean;
-  isGrabbable?: boolean;
-  isTransportable?: boolean;
-  duration?: number;
-  durationRandom?: { min?: number; max?: number };
-  horizontalSpeed?: number;
-  flammable?: {
-    outputElementId?: string;
-    outputChance?: number;
-    fireInheritsDuration?: boolean;
-    duration?: [number, number] | number[];
-  };
-  collectable?: { value?: number };
-  mixes?: readonly { elementType?: number; result?: number }[];
-  interactions?: readonly { kind?: string }[];
-  getExtraProps?: () => { data?: Record<string, unknown> };
-};
+type LiveDefinition = NonNullable<ReturnType<typeof api.elements.getDefinitionByType>>;
 
 type ModElementEntry = {
   elementType?: number;
@@ -138,7 +117,7 @@ function pickBackground(
     const rgb: Rgb = [variant[0]!, variant[1]!, variant[2]!];
     return { backgroundCss: `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`, rgb };
   }
-  const liveMeta = (definition as unknown as { metaColor?: number } | undefined)?.metaColor;
+  const liveMeta = definition?.metaColor;
   const meta =
     typeof liveMeta === "number"
       ? liveMeta
